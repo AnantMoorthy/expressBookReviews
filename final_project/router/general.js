@@ -1,6 +1,5 @@
 const express = require('express');
-const axios = require("axios").default;
-//const bookarry = Object.values(books);
+//const axios = require("axios").default;
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -80,35 +79,29 @@ public_users.post("/register", (req,res) => {
 
   
 // Get book details based on author
-
-//public_users.get('/author/:author',function (req, res) {
   //Write your code here
 
-public_users.get("/author/:author", function (req, res) {
-    
-    function getFromAuthor(author){
-        let output = [];
+    function getBasedOnAuthor(author){
+        let result = [];
         return new Promise((resolve,reject)=>{
           for (var isbn in books) {
             let book_ISBN = books[isbn];
             if (book_ISBN.author === author){
-              output.push(book_ISBN);
+              result.push({"isbn":isbn,"title":books[isbn]["title"],"reviews":books[isbn]["reviews"]});
             }
           }
-          resolve(output);  
+          resolve(result);  
         })
       }
       // Get book details based on author
       public_users.get('/author/:author',function (req, res) {
         const author = req.params.author;
-        getFromAuthor(author)
-        .then(
-          result =>res.send(JSON.stringify(result, null, 4))
+        getBasedOnAuthor(author).then(
+          booksbyauthor =>res.send(JSON.stringify({booksbyauthor}, null, 4))
         );
-      });
-    
-});
- /*let booksbyauthor = [];
+
+
+    /*let booksbyauthor = [];
     let all_isbn = Object.keys(books);
     all_isbn.forEach((isbn) => {
     if(books[isbn]["author"] === req.params.author) {
@@ -119,12 +112,33 @@ public_users.get("/author/:author", function (req, res) {
 
     });
     return res.send("The mentioned author does not exist ")*/ /* - Task 3*/
+      });
+    
+
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
   //Write your code here
     
-  const getbooksbytitle = new Promise((resolve, reject) => {
+  function getBasedOnTitle(title){
+    let result = [];
+    return new Promise((resolve,reject)=>{
+      for (var isbn in books) {
+        let book_ISBN = books[isbn];
+        if (book_ISBN.title === title){
+          result.push({"isbn":isbn,"author":books[isbn]["author"],"reviews":books[isbn]["reviews"]});
+        }
+      }
+      resolve(result);  
+    })
+  }
+  // Get all books based on title
+  public_users.get('/title/:title',function (req, res) {
+    const title = req.params.title;
+    getBasedOnTitle(title).then(
+      booksbytitle =>res.send(JSON.stringify({booksbytitle}, null, 4))
+    );
+
+    /*const getbooksbytitle = new Promise((resolve, reject) => {
     let booksbytitle = [];
     let all_isbn = Object.keys(books);
     all_isbn.forEach((isbn) => {
@@ -135,10 +149,8 @@ public_users.get('/title/:title',function (req, res) {
 
 
     });
-    reject(res.send("The mentioned title does not exist "))
-    
-});
-});
+    reject(res.send("The mentioned title does not exist "))*/  /* - Task 4*/
+  });
 
 
 //  Get book review
