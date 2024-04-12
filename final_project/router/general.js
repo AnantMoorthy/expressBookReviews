@@ -9,7 +9,23 @@ const public_users = express.Router();
 
 public_users.post("/register", (req,res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+
+  const username = req.body.username;
+  const password = req.body.password;
+
+  if(username && password){
+    if(!isValid(username)){
+        users.push({"username":username,"password":password});
+        return res.status(200).json({message: `Customer ${username} has been successfully registered. Now you can log in`});
+    }
+    else{
+        return res.status(404).json({message: "Username already exists, try again"});
+    }
+  }
+  return res.status(404).json({message: "Please provide valid details"});
+
+
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 function getBookList() {
@@ -43,14 +59,12 @@ public_users.get("/author/:author", function (req, res) {
     const getbookbyauthors = bookarry.filter(
         (book) => book.author == req.params.author
     );*/
-    const get_books_author = new Promise((resolve, reject) => {
+    const getbooksbyauthor = new Promise((resolve, reject) => {
     let booksbyauthor = [];
-    let isbns = Object.keys(books);
-    isbns.forEach((isbn) => {
+    let all_isbn = Object.keys(books);
+    all_isbn.forEach((isbn) => {
     if(books[isbn]["author"] === req.params.author) {
-        booksbyauthor.push({"isbn":isbn,
-                            "title":books[isbn]["title"],
-                            "reviews":books[isbn]["reviews"]});
+        booksbyauthor.push({"isbn":isbn,"title":books[isbn]["title"],"reviews":books[isbn]["reviews"]});
     resolve(res.send(JSON.stringify({booksbyauthor}, null, 4)));
     }
 
@@ -112,10 +126,26 @@ public_users.get("/author/:author", function (req, res) {
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
-    const title = req.params.title;
+    
+  const getbooksbytitle = new Promise((resolve, reject) => {
+    let booksbytitle = [];
+    let all_isbn = Object.keys(books);
+    all_isbn.forEach((isbn) => {
+    if(books[isbn]["title"] === req.params.title) {
+        booksbytitle.push({"isbn":isbn,"author":books[isbn]["author"],"reviews":books[isbn]["reviews"]});
+    resolve(res.send(JSON.stringify({booksbytitle}, null, 4)));
+    }
+
+
+    });
+    reject(res.send("The mentioned author does not exist "))
+    
+});
+  
+  /*const title = req.params.title;
 
     let filtered_books = Object.entries(books).filter(([isbn, info]) => info.title === title)
-    res.send(filtered_books);
+    res.send(filtered_books);*/
   
     //return res.status(300).json({message: "Yet to be implemented"});
 });
@@ -123,7 +153,11 @@ public_users.get('/title/:title',function (req, res) {
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+
+  const ISBN = req.params.isbn;
+  res.send(books[ISBN].reviews)
+
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 module.exports.general = public_users;
