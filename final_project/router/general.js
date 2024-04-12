@@ -1,4 +1,6 @@
 const express = require('express');
+const axios = require("axios").default;
+//const bookarry = Object.values(books);
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -33,11 +35,15 @@ public_users.get('/isbn/:isbn',function (req, res) {
   
 // Get book details based on author
 
-public_users.get('/author/:author',function (req, res) {
+//public_users.get('/author/:author',function (req, res) {
   //Write your code here
 
-  const get_books_author = new Promise((resolve, reject) => {
-
+public_users.get("/author/:author", function (req, res) {
+    /*let bookarry = Object.values(books);
+    const getbookbyauthors = bookarry.filter(
+        (book) => book.author == req.params.author
+    );*/
+    const get_books_author = new Promise((resolve, reject) => {
     let booksbyauthor = [];
     let isbns = Object.keys(books);
     isbns.forEach((isbn) => {
@@ -54,12 +60,26 @@ public_users.get('/author/:author',function (req, res) {
     
 });
 
-get_books_author.then(function(){
-        console.log("Promise is resolved");
-}).catch(function () { 
-            console.log('The mentioned author does not exist');
-});
-
+      /*return res.status(200).json({
+        message: "booksbyauthor",
+        data: getbookbyauthors,
+      });
+    } else {
+      res.json({ message: "Invalid author name" }).status(404);
+    }
+  });*/
+  //axios with async and await  you ned to call this  getaxiosbasonauthor(req.params.author);;
+  
+  async function getaxiosbasonauthor(author) {
+    await axios
+      .get(`http://172.22.138.176:5000/author/${author}`)
+      .then((response) => {
+        return console.log(response.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
 
    // const author = req.params.author;
    
