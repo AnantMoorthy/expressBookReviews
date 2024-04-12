@@ -46,16 +46,38 @@ public_users.post("/register", (req,res) => {
   });
   
   
-  /*res.send(JSON.stringify(books,null,4)); - Task 1
- });*/
+  /*res.send(JSON.stringify(books,null,4)); - Task 1*/
+
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here
-  const isbn = req.params.isbn;
-  res.send(books[isbn])
- // return res.status(300).json({message: "Yet to be implemented"});
- });
+
+  function getBasedOnISBN(isbn){
+    let book_ISBN = books[isbn];
+
+    return new Promise((resolve,reject)=>{
+      if (book_ISBN) {
+        resolve(book_ISBN);
+      }else{
+        reject("The book you are looking for is unavailable!");
+      }    
+    })
+  }
+  // Get book details based on ISBN
+  public_users.get('/isbn/:isbn',function (req, res) {
+
+    const isbn = req.params.isbn;
+
+    getBasedOnISBN(isbn).then(
+      (book)=>res.send(JSON.stringify(book, null, 4)),
+      (error) => res.send("ISBN not found")
+    )
+
+
+/*const isbn = req.params.isbn;
+  res.send(books[isbn]) -Task 2*/
+});
+
   
 // Get book details based on author
 
@@ -63,68 +85,40 @@ public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here
 
 public_users.get("/author/:author", function (req, res) {
-    /*let bookarry = Object.values(books);
-    const getbookbyauthors = bookarry.filter(
-        (book) => book.author == req.params.author
-    );*/
-    const getbooksbyauthor = new Promise((resolve, reject) => {
-    let booksbyauthor = [];
+    
+    function getFromAuthor(author){
+        let output = [];
+        return new Promise((resolve,reject)=>{
+          for (var isbn in books) {
+            let book_ISBN = books[isbn];
+            if (book_ISBN.author === author){
+              output.push(book_ISBN);
+            }
+          }
+          resolve(output);  
+        })
+      }
+      // Get book details based on author
+      public_users.get('/author/:author',function (req, res) {
+        const author = req.params.author;
+        getFromAuthor(author)
+        .then(
+          result =>res.send(JSON.stringify(result, null, 4))
+        );
+      });
+    
+});
+ /*let booksbyauthor = [];
     let all_isbn = Object.keys(books);
     all_isbn.forEach((isbn) => {
     if(books[isbn]["author"] === req.params.author) {
         booksbyauthor.push({"isbn":isbn,"title":books[isbn]["title"],"reviews":books[isbn]["reviews"]});
-    resolve(res.send(JSON.stringify({booksbyauthor}, null, 4)));
+    return res.send(JSON.stringify({booksbyauthor}, null, 4));
     }
 
 
     });
-    reject(res.send("The mentioned author does not exist "))
-    
-});
-
-      /*return res.status(200).json({
-        message: "booksbyauthor",
-        data: getbookbyauthors,
-      });
-    } else {
-      res.json({ message: "Invalid author name" }).status(404);
-    }
-  });*/
-  //axios with async and await  you ned to call this  getaxiosbasonauthor(req.params.author);;
-  
-  async function getaxiosbasonauthor(author) {
-    await axios
-      .get(`http://172.22.138.176:5000/author/${author}`)
-      .then((response) => {
-        return console.log(response.data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
-
-   // const author = req.params.author;
-   
-  
-    /* new Promise((resolve, reject) => {
-        const filteredObj = Object.fromEntries(
-          Object.entries(books).filter(([key, value]) => value.author === author)
-        );
-        resolve(filteredObj);
-      })
-        .then((result) => {
-          res.send(result);
-        })
-        .catch((error) => {
-          console.log(error);
-          res.sendStatus(500);
-        });*/
-    
-    /*let filtered_books = Object.entries(books).filter(([isbn, info]) => info.author === author)
-    res.send(filtered_books);*/
-
-  //return res.status(300).json({message: "Yet to be implemented"});
-});
+    return res.send("The mentioned author does not exist ")*/ /* - Task 3*/
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
@@ -141,17 +135,11 @@ public_users.get('/title/:title',function (req, res) {
 
 
     });
-    reject(res.send("The mentioned author does not exist "))
+    reject(res.send("The mentioned title does not exist "))
     
 });
-  
-  /*const title = req.params.title;
-
-    let filtered_books = Object.entries(books).filter(([isbn, info]) => info.title === title)
-    res.send(filtered_books);*/
-  
-    //return res.status(300).json({message: "Yet to be implemented"});
 });
+
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
